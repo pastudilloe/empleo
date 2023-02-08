@@ -1,0 +1,98 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<head>
+   <title>Ecuador's Economic Activities</title>
+   <!-- <link href="https://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet"> -->
+</head>
+
+<script src="./js/d3.js"></script>
+<script src="./js/d3plus.js"></script>
+<script src="./js/topojson.js"></script>
+<script src="./js/d3.v3.min.js"></script>
+<script src="./js/queue.v1.min.js"></script>
+<script src="./js/topojson.v1.min.js"></script>
+<script src="./js/d3.tip.v0.6.3.js"></script>
+
+<style>
+
+body {
+  margin: 1px; padding:2%;
+}
+
+</style>
+
+<body>
+
+<div class="page">
+  <div id="viz-container">
+    <div class="single_viz" id="treemap">
+      <!-- <div class="text">
+        Transacciones por Industria
+        <p>Write any text here </p>
+      </div> -->
+      <div class="chart" id="svg_treemap"></div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// instantiate our D3plus viz object
+var viz = d3plus.viz()
+// here we get all the data we need from the server, firt the raw data, then
+// each of the attribute files
+
+
+d3.tsv("./n2.tsv", function(error2, n2x) {
+  if (error2) return console.error(error2);
+  console.log(n2x);
+
+  d3.tsv("./n1.tsv", function(error1, n1x) {
+    if (error1) return console.error(error1);
+    console.log(n1x);
+
+    d3.tsv("./empleo_productivo.tsv", function(error, ecuador) {
+      if (error) return console.error(error);
+      console.log(ecuador);
+      // Coerce data values to be numeric
+      ecuador.forEach(function(d) {
+        d.formal = +d.formal
+        d.informal = +d.informal
+        d.total = +d.total;
+      });
+      console.log(ecuador);
+
+      var attrs = {"n1": n1x, "n2": n2x}
+      console.log(attrs);
+
+      // set attributes on our viz object
+      var visualization = d3plus.viz()
+      .container("#svg_treemap")
+      .messages({"branding":true})
+      .data(ecuador)
+      .attrs(attrs)
+      .type("bar")
+      .id(["n1","n2"])
+      .x("n2")
+      .y("total")
+      .order("total")
+      // .y({"stacked": true, "value": "total"})
+      .text({"n1":"n1_description","n2":"n2_description"})
+      // .labels({"align": "left", "valign": "top"})
+      .depth(0)
+      .ui([
+        {
+          "method" : "y",
+          "value"  : ["total", "formal" , "informal"]
+        }
+      ])
+      .draw()
+    })
+  })
+})
+
+
+</script>
+
+</body>
